@@ -1,11 +1,12 @@
 import { Button, Badge, Rate, Modal, Input, Steps, Tabs } from "antd";
 import { ShoppingCartOutlined, EditOutlined } from "@ant-design/icons";
 import { Link, useParams } from "react-router-dom";
-import { useEffect, useReducer } from "react";
+import { useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import logger from "use-reducer-logger";
 // import data from "../../../data";
 import Loading from "../../message/Loading";
+import {Store} from "../../../App";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -49,10 +50,17 @@ const Product = () => {
     getData();
   }, [params.id]);
 
+  const { state, dispatch: cxtDispatch } = useContext(Store);
+  const addToCartHandler = () => {
+    cxtDispatch({ type: "CART_ADD_ITEM", payload: { ...product,quantity:1 }})
+  };
+
   return loading ? (
-    <Loading/>
+    <Loading />
   ) : error ? (
-    <div className="container bg-red-600 text-white p-8 w-5/6 my-52 rounded-3xl text-3xl font-sans font-semibold">{error}</div>
+    <div className='container bg-red-600 text-white p-8 w-5/6 my-52 rounded-3xl text-3xl font-sans font-semibold'>
+      {error}
+    </div>
   ) : (
     <>
       <div className='flex mx-16 my-10 p-5 justify-evenly '>
@@ -99,15 +107,19 @@ const Product = () => {
               +
             </Button>
           </div>
-          <div className='flex justify-evenly'>
-            <Button
-              className='bt-dhang'
-              icon={<ShoppingCartOutlined />}
-              //   onClick={() => dispatch(addtoCart(sach ,count))}
-            >
-              Đặt hàng
-            </Button>
-          </div>
+
+          {product.soluong > 0 && (
+            <div className='flex justify-evenly'>
+              <Button
+                className='bt-dhang'
+                icon={<ShoppingCartOutlined />}
+                //   onClick={() => dispatch(addtoCart(sach ,count))}
+                onClick={addToCartHandler}
+              >
+                Đặt hàng
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </>

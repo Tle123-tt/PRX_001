@@ -51,7 +51,7 @@ const Sanpham = () => {
       </div>
       <div className="border-0 border-8 border-b border-black border-solid container w-5/6"/>
       <div className='sachs flex flex-wrap justify-center container  py-12 w-5/6'>
-        {loading ? (
+        {/* {loading ? (
           <Loading/>
         ):error ? (
           <div>{error}</div>
@@ -86,7 +86,7 @@ const Sanpham = () => {
               </div>
             </div>
           </div>
-        )))}
+        )))} */}
       </div>
     </>
   );
