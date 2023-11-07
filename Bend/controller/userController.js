@@ -38,20 +38,24 @@ const login = asyncHandler(async (req, res) => {
   const response = await User.findOne({ email });
   if (response && (await response.isCorrectPassword(password))) {
     const { password, role, ...userData } = response.toObject();
-    const accesstoken = generateAccessToken(response._id, role);
-    const refreshtoken = generateRefreshToken(response._id);
+    const accessToken = generateAccessToken(response._id, role);
+    const refreshToken = generateRefreshToken(response._id);
     //Lưu refreshToken vào database
-    await User.findByIdAndUpdate(response._id, { refreshtoken }, { new: true });
+    await User.findByIdAndUpdate(
+      response._id,
+      { refreshToken: refreshToken },
+      { new: true }
+    );
     //Lưu refreshToken vào cookie
-    res.cookie("RefreshToken", refreshtoken, {
+    res.cookie("RefreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({
       sucess: true,
       message: "Đăng nhập thành công",
-      accesstoken: accesstoken,
-      refreshtoken: refreshtoken,
+      accessToken: accessToken,
+      // refreshToken: refreshToken,
     });
   } else {
     throw new Error("Invalid credentials!");
@@ -64,24 +68,43 @@ const getCurrent = asyncHandler(async (req, res) => {
     "-refreshToken -password -role"
   );
   return res.status(200).json({
-    success: false,
+    success: user ? true : false,
     rs: user ? user : "User not found",
   });
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const cookie = req.cookies;
-  if (!cookie && !cookie.refreshtoken) throw new Error("No refresh token in cookies");
-  jwt.verify(cookie.refreshtoken, process.env.JWT_TOKEN,async (err, decode)=>{
-    if (err) throw new Error('Invalid refresh token')
-    const response = await User.findOne({_id: decode._id, refreshtoken: cookie.refreshtoken})
-    return res.status(200).json({
-      success: response ? true: false,
-      newAccessToken: response ? generateAccessToken(response._id, response.role):'Refresh token not matched'
-    })
-  }) 
-});  
+  if (!cookie && !cookie.refreshToken)
+    throw new Error("No refresh token in cookies");
+  // await jwt.verify(
+  //   cookie.refreshToken,
+  //   process.env.JWT_TOKEN,
+  //   async (err, doc) => {
+  //     if (err) throw new Error('Invalid refresh token');
+  //     const response = await User.findOne({
+  //       _id: doc._id,
+  //       refreshToken: cookie.refreshToken,
+  //     });
+  //     return res.status(200).json({
+  //       success: response ? true : false,
+  //       newAccessToken: response
+  //         ? generateAccessToken(response._id, response.role)
+  //         : 'Refresh token not matched',
+  //     });
+  //   }
+  // );
+  const rs = await jwt.verify(cookie.refreshToken, process.env.JWT_TOKEN);
+  const response = await User.findOne({
+    _id: rs._id,
+    refreshToken: cookie.refreshToken,
+  });
+  return res.status(200).json({
+    success: response ? true : false,
+    newAccessToken: response
+      ? generateAccessToken(response._id, response.role)
+      : "Refresh token not matched",
+  });
+});
 
 module.exports = { register, login, getCurrent, refreshAccessToken };
-
- 
