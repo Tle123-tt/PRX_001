@@ -2,7 +2,7 @@ const {
   generateAccessToken,
   generateRefreshToken,
 } = require("../middlewares/jwt");
-const { User } = require("../model/userModel");
+const User = require("../model/userModel");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 
@@ -55,7 +55,6 @@ const login = asyncHandler(async (req, res) => {
       sucess: true,
       message: "Đăng nhập thành công",
       accessToken: accessToken,
-      // refreshToken: refreshToken,
     });
   } else {
     throw new Error("Invalid credentials!");
@@ -64,9 +63,7 @@ const login = asyncHandler(async (req, res) => {
 
 const getCurrent = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-  const user = await User.findById({ _id }).select(
-    "-refreshToken -password -role"
-  );
+  const user = await User.findById(_id).select("-refreshToken -password -role");
   return res.status(200).json({
     success: user ? true : false,
     rs: user ? user : "User not found",
@@ -74,36 +71,14 @@ const getCurrent = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  // const cookie = req.cookies;
-  // if (!cookie && !cookie.refreshToken)
-  //   throw new Error("No refresh token in cookies");
-  // await jwt.verify(
-  //   cookie.refreshToken,
-  //   process.env.JWT_TOKEN,
-  //   async (err, doc) => {
-  //     if (err) throw new Error('Invalid refresh token');
-  //     const response = await User.findOne({
-  //       _id: doc._id,
-  //       refreshToken: cookie.refreshToken,
-  //     });
-  //     return res.status(200).json({
-  //       success: response ? true : false,
-  //       newAccessToken: response
-  //         ? generateAccessToken(response._id, response.role)
-  //         : 'Refresh token not matched',
-  //     });
-  //   }
-  // );
-  // Lấy token từ cookies
   const cookie = req.cookies;
-  // Check xem có token hay không
-  if (!cookie && !cookie.refreshToken)
+  console.log(req.cookies.RefreshToken);
+  if (!cookie && !cookie.RefreshToken)
     throw new Error("No refresh token in cookies");
-  // Check token có hợp lệ hay không
-  const rs = await jwt.verify(cookie.refreshToken, process.env.JWT_TOKEN);
+  const rs = await jwt.verify(cookie.RefreshToken, process.env.JWT_TOKEN);
   const response = await User.findOne({
     _id: rs._id,
-    refreshToken: cookie.refreshToken,
+    refreshToken: cookie.RefreshToken,
   });
   return res.status(200).json({
     success: response ? true : false,
@@ -111,24 +86,37 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       ? generateAccessToken(response._id, response.role)
       : "Refresh token not matched",
   });
+  // await jwt.verify(
+  //   cookie.RefreshToken,
+  //   process.env.JWT_TOKEN,
+  //   async (err, doc) => {
+  //     if (err) throw new Error("Invalid refresh token", console.log(err));
+  //     const response = await User.findOne({
+  //       _id: doc._id,
+  //       refreshToken: cookie.RefreshToken,
+  //     });
+  //     return res.status(200).json({
+  //       success: response ? true : false,
+  //       newAccessToken: response
+  //         ? generateAccessToken(response._id, response.role)
+  //         : "Refresh token not matched",
+  //     });
+  //   }
+  // );
 });
 
 const logout = asyncHandler(async (req, res) => {
   const cookie = req.cookies;
   if (!cookie || !cookie.refreshToken)
     throw new Error("No refresh token in cookies");
-  await User.findByIdAndUpdate(
-    { refreshToken: cookie.refreshToken },
-    { refreshToken: "" },
-    { new: true }
-  );
-  res.clearCookie("refreshToken",{
+  await User.findOneAndUpdate({refreshToken:cookie.RefreshToken},{refreshToken:''},{new:true})
+  res.clearCookie('refreshToken',{
     httpOnly:true,
-    secure: true
-  });
+    secure:true
+  })
   return res.status(200).json({
-    success: true,
-    mes:'Logout is done'
+    success:true,
+    mes: 'Logout is done'
   })
 });
 

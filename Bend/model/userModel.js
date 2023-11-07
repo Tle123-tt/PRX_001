@@ -73,4 +73,4 @@ userModel.methods = {
 
 const User = mongoose.model("dta_user", userModel);
 
-module.exports = { User };
+module.exports = User ;

@@ -6,7 +6,7 @@ router.post("/register", User.register);
 router.post("/login", User.login);
 router.get("/current", verifyAccessToken, User.getCurrent);
 router.post("/refreshtoken", User.refreshAccessToken);
-router.get("/logout",User.logout);
-
+router.get("/logout",verifyAccessToken, User.logout);
 
 module.exports = router;
+ 
