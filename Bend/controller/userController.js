@@ -74,9 +74,9 @@ const getCurrent = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const cookie = req.cookies;
-  if (!cookie && !cookie.refreshToken)
-    throw new Error("No refresh token in cookies");
+  // const cookie = req.cookies;
+  // if (!cookie && !cookie.refreshToken)
+  //   throw new Error("No refresh token in cookies");
   // await jwt.verify(
   //   cookie.refreshToken,
   //   process.env.JWT_TOKEN,
@@ -94,6 +94,12 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   //     });
   //   }
   // );
+  // Lấy token từ cookies
+  const cookie = req.cookies;
+  // Check xem có token hay không
+  if (!cookie && !cookie.refreshToken)
+    throw new Error("No refresh token in cookies");
+  // Check token có hợp lệ hay không
   const rs = await jwt.verify(cookie.refreshToken, process.env.JWT_TOKEN);
   const response = await User.findOne({
     _id: rs._id,
@@ -107,4 +113,23 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { register, login, getCurrent, refreshAccessToken };
+const logout = asyncHandler(async (req, res) => {
+  const cookie = req.cookies;
+  if (!cookie || !cookie.refreshToken)
+    throw new Error("No refresh token in cookies");
+  await User.findByIdAndUpdate(
+    { refreshToken: cookie.refreshToken },
+    { refreshToken: "" },
+    { new: true }
+  );
+  res.clearCookie("refreshToken",{
+    httpOnly:true,
+    secure: true
+  });
+  return res.status(200).json({
+    success: true,
+    mes:'Logout is done'
+  })
+});
+
+module.exports = { register, login, getCurrent, refreshAccessToken, logout };
