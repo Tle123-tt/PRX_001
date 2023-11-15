@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrybt = require("bcrypt");
+const crypto = require('crypto')
 
 const userModel = new mongoose.Schema(
   {
@@ -27,7 +28,7 @@ const userModel = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: true,
+      default: "user",
     },
     cart: {
       type: Array,
@@ -67,10 +68,19 @@ userModel.pre("save", async function (next) {
 
 userModel.methods = {
   isCorrectPassword: async function (password) {
-    return await bcrybt.compare(password, this.password)
+    return await bcrybt.compare(password, this.password);
+  },
+  createPasswordChangedToken: function () {
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    this.passwordResetToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    this.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+    return resetToken
   },
 };
 
 const User = mongoose.model("dta_user", userModel);
 
-module.exports = User ;
+module.exports = User;
