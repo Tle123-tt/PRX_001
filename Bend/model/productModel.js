@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const productModel = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
       require: true,
       trim: true,
@@ -17,7 +17,7 @@ const productModel = new mongoose.Schema(
       type: String,
       require: true,
     },
-    nxb: {
+    publiser: {
       type: String,
       require: true,
     },
