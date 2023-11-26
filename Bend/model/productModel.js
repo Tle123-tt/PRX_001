@@ -46,7 +46,7 @@ const productModel = new mongoose.Schema(
     },
     rating: [
       {
-        star: { type: String },
+        star: { type: Number },
         postedBy: { type: mongoose.Types.ObjectId, ref: "user" },
         comment: { type: String },
       },

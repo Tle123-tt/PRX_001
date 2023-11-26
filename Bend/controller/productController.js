@@ -1,4 +1,4 @@
-const {response}=require("express");
+const { response } = require("express");
 const Product = require("../model/productModel");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
@@ -26,20 +26,46 @@ const getProducts = asyncHandler(async (req, res) => {
   const queries = { ...req.query };
   const excludefields = ["limit", "sort", "page", "fields"];
   excludefields.forEach((el) => delete queries[el]);
-  let queryString = JSON.stringify();
-  queryString.replace(/\b(gte|gt|lt|lte)\b/g, (matchedEl) => `$${matchedEl}`);
-  const formateQueries = JSON.parse(queryString);
+
+  let queryString = JSON.stringify(queries);
+  queryString = queryString.replace(
+    /\b(gte|gt|lt|lte)\b/g,
+    (matchedEl) => `$${matchedEl}`
+  );
+  const formatedQueries = JSON.parse(queryString);
+  console.log(formatedQueries);
+
   if (queries?.title)
-    formateQueries.title = { $regex: queries.title, $option: "i" };
-  let queryComand=Product.find(formateQueries);
-  queryComand.exec((err, response)=>{
-    
-  })
-    // const products = await Product.find();
-  return res.status(200).json({
-    success: products ? true : false,
-    Products: products ? products : "Cannot get product",
-  });
+    formatedQueries.title = { $regex: queries.title, $options: "i" };
+  let queryComand = Product.find(formatedQueries);
+
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
+    queryComand = queryComand.sort(sortBy);
+  }
+
+  if (req.body.fields) {
+    const fields = req.body.fields.split(",").json(" ");
+    queryComand = queryComand.select(fields);
+  }
+
+  const page = +req.query.page || 1;
+  const limit = +req.query.limit || process.env.LIMIT_PRODUCTS;
+  const skip = (page - 1) * limit;
+  queryComand.skip(skip).limit(limit);
+
+  queryComand
+    .then(async (response) => {
+      const counts = await Product.find(formatedQueries).countDocuments();
+      return res.status(200).json({
+        success: response ? true : false,
+        Products: response ? response : "Cannot get product",
+        counts,
+      });
+    })
+    .catch((err) => {
+      if (err) throw new Error(err.message);
+    });
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
@@ -63,10 +89,54 @@ const deleteProduct = asyncHandler(async (req, res) => {
   });
 });
 
+const rating = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { star, comment, pid } = req.body;
+  
+  if (!star || !pid) throw new Error("Missing inputs");
+  const ratingProduct = await Product.findById(pid);
+  const alreadyRating = ratingProduct?.rating?.find(
+    (el) => el.postedBy === _id
+  );
+
+  if (alreadyRating) {
+    await Product.updateOne(
+      {
+        rating: { $elemMatch: alreadyRating },
+      },
+      {
+        $set: { "rating.$.start": star, "rating.$.comment": comment },
+      },
+      { new: true }
+    );
+  } else {
+    const response = await Product.findByIdAndUpdate(
+      pid,
+      {
+        $push: { rating: { star, comment, postedBy: _id } },
+      },
+      { new: true }
+    );
+  }
+
+  const updateProduct = await Product.findById(pid);
+  const ratingCount = updateProduct.rating.length;
+  const sumRatings = updateProduct.rating.reduce((sum,el) => sum+ +el.star, 0);
+  updateProduct.totalRating = Math.round((sumRatings * 10) / ratingCount) / 10;
+
+  await updateProduct.save();
+
+  return res.status(200).json({
+    status: true,
+    updateProduct,
+  });
+});
+
 module.exports = {
   createProduct,
   getProduct,
   getProducts,
   updateProduct,
   deleteProduct,
+  rating,
 };
