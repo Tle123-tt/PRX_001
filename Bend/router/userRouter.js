@@ -9,10 +9,12 @@ router.post("/refreshtoken", User.refreshAccessToken);
 router.get("/logout", verifyAccessToken, User.logout);
 router.get("/forgotpassword", User.forgotPassword);
 router.put("/resetpassword", User.resetPassword);
-// router.use(verifyAccessToken)
 router.get("/", [verifyAccessToken, isAdmin], User.getUsers);
 router.delete("/", [verifyAccessToken, isAdmin], User.deleteUsers);
+router.put("/address",[verifyAccessToken], User.updateAddressUser);
+router.put("/cart",[verifyAccessToken], User.updateCart);
 router.put("/current",[verifyAccessToken], User.updateUsers);
 router.put("/:uid",[verifyAccessToken, isAdmin], User.updateUsersbyAdmin);
+
 
 module.exports = router;

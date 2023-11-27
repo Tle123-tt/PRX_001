@@ -61,6 +61,6 @@ const productModel = new mongoose.Schema(
   }
 );
 
-const Product = mongoose.model("dta_product", productModel);
+const Product = mongoose.model("product", productModel);
 
 module.exports = Product;

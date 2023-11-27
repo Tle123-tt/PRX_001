@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrybt = require("bcrypt");
-const crypto = require('crypto')
+const crypto = require("crypto");
 
 const userModel = new mongoose.Schema(
   {
@@ -30,12 +30,24 @@ const userModel = new mongoose.Schema(
       type: String,
       default: "user",
     },
-    cart: {
-      type: Array,
-      default: [],
-    },
-    address: [{ type: mongoose.Types.ObjectId, ref: "Address" }],
-    wishlist: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
+    cart: [
+      {
+        product: {
+          type: mongoose.Types.ObjectId,
+          ref: "product",
+        },
+        quantity:Number,
+        language:String,
+
+      },
+    ],
+    address: String,
+    wishlist: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "product",
+      },
+    ],
     isBlocked: {
       type: Boolean,
       default: false,
@@ -77,7 +89,7 @@ userModel.methods = {
       .update(resetToken)
       .digest("hex");
     this.passwordResetExpires = Date.now() + 15 * 60 * 1000;
-    return resetToken
+    return resetToken;
   },
 };
 
