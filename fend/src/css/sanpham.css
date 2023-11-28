@@ -1,0 +1,17 @@
+.post-ctiet{
+     border-bottom: 1px solid black;
+}
+
+.bt-dhang{
+    background-color: red;
+    color:aliceblue;
+    width: 200px;
+    height: 47px;
+}
+
+.bt-dthu{
+    background-color: blue;
+    color:aliceblue;
+    width: 200px;
+    height: 47px;
+}

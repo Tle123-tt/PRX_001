@@ -1,0 +1,8 @@
+.slider-bg{
+    height: 667px;
+    background-image:linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("../../public/slider/640px-Bookshelf_Prunksaal_OeNB_Vienna_AT_matl00786ch.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
