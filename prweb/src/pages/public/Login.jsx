@@ -1,59 +1,94 @@
-import { Input, Button, Checkbox } from "antd";
-import { Link } from "react-router-dom";;
+import { InputFields, Button } from "../../components";
+import { useCallback, useState } from "react";
+import { apiReigister, apiLogin } from "../../apis/user";
 
 const Login = () => {
+  const [payload, setPayload] = useState({
+    email: "",
+    password: "",
+    firstname: "",
+    lastname: "",
+  });
 
-  const onChange = (e) => {
-    console.log(`checked = ${e.target.checked}`);
-  };
+  const [isRegister, setIsRegister] = useState(false);
+
+  const handleSubmit = useCallback(async() => {
+    const { firstname, lastname, ...data } = payload;
+    if (isRegister) {
+      const response=await apiReigister(payload)
+      console.log(response)
+    } else {
+      const rs=await apiLogin(data)
+      console.log(rs)
+    }
+  }, [payload]);
 
   return (
-    <div className=' h-full flex justify-center'>
-      <div className='bg-slate-300 w-6/12 my-24 px-10 py-5'>
-        <h1 className='text-black font-sans'>Đăng nhập</h1>
-        <form>
-          <div>
-            <p className='font-sans text-xl'>Email:</p>
-          </div>
-          <div className='email'>
-            <Input
-              id='email-form'
-              className='w-3/5'
-              placeholder='Nhập username'
-              
-            />
-          </div>
-          <div>
-            <p className='font-sans text-xl'>Mật khẩu:</p>
-          </div>
-          <div className='password'>
-            <Input.Password
-              id='password-form'
-              className='w-3/5'
-              placeholder='Nhập password'
-              
-            />
-          </div>
-          <div className='pt-4'>
-            <Checkbox onChange={onChange} className='font-sans text-base'>
-              Nhớ mật khẩu
-            </Checkbox>
-          </div>
-          <div className='py-3'>
-            <Link className='font-sans text-xl'>Bạn quên mật khẩu</Link>
-          </div>
+    <div className='w-screen h-screen relative '>
+      <img
+        src='https://c4.wallpaperflare.com/wallpaper/498/1011/761/abstract-simple-background-colorful-waveforms-wallpaper-preview.jpg'
+        alt=''
+        className='w-full h-full object-cover'
+      />
+      <div className='absolute flex justify-center items-center top-0 bottom-0 left-0 right-0'>
+        <div className='bg-white flex flex-col items-center p-8 rounded-md min-w-[500px] '>
+          <h1 className='text-[32px] text-black text-center font-sans mb-8'>
+            {isRegister ? "Register" : "Login"}
+          </h1>
+          {isRegister && (
+            <div>
+              <InputFields
+                value={payload.firstname}
+                setValue={setPayload}
+                nameKey='firstname'
+              />
+              <InputFields
+                value={payload.lastname}
+                setValue={setPayload}
+                nameKey='lastname'
+              />
+            </div>
+          )}
+          <InputFields
+            value={payload.email}
+            setValue={setPayload}
+            nameKey='email'
+          />
+          <InputFields
+            value={payload.password}
+            setValue={setPayload}
+            nameKey='password'
+            type='password'
+          />
           <Button
-            htmlType='submit'
-            className='bg-red-600 text-white w-44 h-12 font-sans'
-          >
-            Đăng nhập
-          </Button>
-          <div className='pb-3'>
-            <p className='font-sans text-xl'>
-              Bạn chưa có tài khoản? Hãy đăng ký <Link to='/dky'>tại đây</Link>
-            </p>
+            name={isRegister ? "Register" : "Login"}
+            handleOnClick={handleSubmit}
+            fw
+          />
+          <div className='flex items-center justify-between my-2 w-full'>
+            {!isRegister && (
+              <span className='text-blue-500 hover:underline cursor-pointer'>
+                ForgotPassword?
+              </span>
+            )}
+            {!isRegister && (
+              <span
+                className='text-blue-500 hover:underline cursor-pointer'
+                onClick={() => setIsRegister(true)}
+              >
+                Create account
+              </span>
+            )}
+            {isRegister && (
+              <span
+                className='text-blue-500 hover:underline cursor-pointer mx-auto'
+                onClick={() => setIsRegister(false)}
+              >
+                Go login
+              </span>
+            )}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

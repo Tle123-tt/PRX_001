@@ -7,3 +7,5 @@ export { default as BestSeller } from "./Bestseller";
 export { default as Product } from "./Product";
 export { default as SelectOption } from "./SelectOption";
 export { default as Topheader} from "./Topheader";
+export { default as InputFields} from "./InputFields";
+export { default as Button} from "./Button";

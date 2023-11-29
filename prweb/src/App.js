@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { Home, Login, Public, Product, Blog, Gthieu, DetailProduct, Dmuc } from "./pages/public";
+import { Home, Login, Public, Product, Blog, Gthieu, DetailProduct, Dmuc, Register } from "./pages/public";
 import path from "./untils/path";
 import { getCategory } from "./store/asyncAction";
 import { useDispatch } from "react-redux";
@@ -23,6 +23,7 @@ function App() {
           <Route path={path.DMUC} element={<Dmuc/>}/>
         </Route>
         <Route path={path.LOGIN} element={<Login />} />
+       
       </Routes>
     </div>
   );

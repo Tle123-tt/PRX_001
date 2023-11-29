@@ -24,6 +24,7 @@ const register = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       sucess: responses ? true : false,
+      mes:'Đăng ký thành công',
       data: responses,
     });
   }

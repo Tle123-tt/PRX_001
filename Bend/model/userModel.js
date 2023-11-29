@@ -20,7 +20,7 @@ const userModel = new mongoose.Schema(
     mobile: {
       type: String,
       require: true,
-      unquie: true,
+      // unquie: true,
     },
     password: {
       type: String,
