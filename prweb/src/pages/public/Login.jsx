@@ -1,6 +1,7 @@
 import { InputFields, Button } from "../../components";
 import { useCallback, useState } from "react";
 import { apiReigister, apiLogin } from "../../apis/user";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const [payload, setPayload] = useState({
@@ -8,20 +9,37 @@ const Login = () => {
     password: "",
     firstname: "",
     lastname: "",
+    mobile: "",
   });
 
   const [isRegister, setIsRegister] = useState(false);
+  const resetPayload = () => {
+    setPayload({
+      email: "",
+      password: "",
+      firstname: "",
+      lastname: "",
+      mobile: "",
+    });
+  };
 
-  const handleSubmit = useCallback(async() => {
-    const { firstname, lastname, ...data } = payload;
+  const handleSubmit = async () => {
+    const { firstname, lastname, mobile, ...data } = payload;
     if (isRegister) {
-      const response=await apiReigister(payload)
-      console.log(response)
+      const response = await apiReigister(payload);
+      Swal.fire(
+        response.success ? "Congradtulation" : "Oops",
+        response.mes,
+        response.success ? "success" : "error"
+      ).then(() => {
+        setIsRegister(false);
+        resetPayload();
+      });
     } else {
-      const rs=await apiLogin(data)
-      console.log(rs)
+      const rs = await apiLogin(data);
+      console.log(rs);
     }
-  }, [payload]);
+  };
 
   return (
     <div className='w-screen h-screen relative '>
@@ -53,6 +71,11 @@ const Login = () => {
             value={payload.email}
             setValue={setPayload}
             nameKey='email'
+          />
+          <InputFields
+            value={payload.mobile}
+            setValue={setPayload}
+            nameKey='mobile'
           />
           <InputFields
             value={payload.password}
