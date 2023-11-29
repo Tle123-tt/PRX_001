@@ -22,4 +22,4 @@ const initRoutes = (app) => {
   app.use(errHandler);
 };
 
-module.exports = initRoutes;
+module.exports = initRoutes; 
